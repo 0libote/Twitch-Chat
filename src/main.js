@@ -136,11 +136,9 @@ const app = createApp({
         const scrollToBottom = (force = false) => {
             if (!force && !store.autoScroll) return;
             nextTick(() => {
-                if (messageListRef.value) {
-                    messageListRef.value.scrollTo({
-                        top: messageListRef.value.scrollHeight,
-                        behavior: force ? 'instant' : 'smooth'
-                    });
+                const el = messageListRef.value;
+                if (el) {
+                    el.scrollTop = el.scrollHeight;
                 }
             });
         };
