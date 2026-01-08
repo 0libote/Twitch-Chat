@@ -49,7 +49,3 @@ Simply open `index.html` in any modern web browser. No installation or build ste
 ## 🤝 Contributing
 
 NexChat is built for the community. Feel free to open issues or submit pull requests to enhance the signal intelligence capabilities!
-
----
-
-*Built with ❤️ for the Twitch Community.*
