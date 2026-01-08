@@ -330,8 +330,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            scroll-behavior: smooth;
-            /* Added for smooth jump */
+            /* Remove smooth scroll globally to fix programmatic scroll lag */
         }
 
         #jump-to-bottom {
@@ -393,14 +392,18 @@
         .msg-meta {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            min-width: 60px;
+            align-items: flex-end;
+            /* Align timestamp to the right of its box */
+            min-width: 65px;
+            padding-top: 4px;
+            /* Line up with username top */
         }
 
         .timestamp {
-            font-size: 0.7rem;
+            font-size: 0.72rem;
             color: var(--text-muted);
             font-weight: 500;
+            white-space: nowrap;
         }
 
         .msg-body {
@@ -657,12 +660,12 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: var(--border);
+            background: rgba(145, 71, 255, 0.2);
             border-radius: 10px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-muted);
+            background: var(--primary);
         }
     </style>
 </head>
@@ -977,23 +980,22 @@
                 };
 
                 dom.jumpBtn.onclick = () => {
-                    dom.messageList.scrollTop = dom.messageList.scrollHeight;
                     autoScroll = true;
                     dom.autoscrollBtn.classList.add('active');
+                    dom.messageList.scrollTo({ top: dom.messageList.scrollHeight, behavior: 'smooth' });
                     dom.jumpBtn.style.display = 'none';
                 };
 
                 dom.messageList.onscroll = () => {
                     const { scrollTop, scrollHeight, clientHeight } = dom.messageList;
-                    const isAtBottom = (scrollHeight - scrollTop - clientHeight) < 100;
+                    const isAtBottom = (scrollHeight - scrollTop - clientHeight) < 50;
 
-                    // Update jump button visibility
                     dom.jumpBtn.style.display = isAtBottom ? 'none' : 'flex';
 
-                    // Update autoscroll state if user manually scrolls away from bottom
+                    // If user scrolls up, disable autoscroll automatically
                     if (!isAtBottom && autoScroll) {
-                        // We don't force disable the toggle, but we stop the scrolling logic
-                        // If the user wants to keep it OFF, they click the button.
+                        autoScroll = false;
+                        dom.autoscrollBtn.classList.remove('active');
                     }
                 };
             };
