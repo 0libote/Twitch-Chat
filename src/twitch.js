@@ -50,30 +50,59 @@ export const TwitchClient = {
 
     parseIrc(raw) {
         try {
-            const parts = raw.split(' :');
-            const tagPart = parts[0];
-            const msgPart = parts.slice(1).join(' :');
+            const parts = raw.trim().split(' ');
+            let offset = 0;
+            let tags = {};
 
-            const meta = {};
-            tagPart.split(';').forEach(tag => {
-                const [key, val] = tag.split('=');
-                meta[key] = val;
-            });
+            // 1. Tags
+            if (parts[offset] && parts[offset].startsWith('@')) {
+                const tagStr = parts[offset].slice(1);
+                tagStr.split(';').forEach(t => {
+                    const [k, v] = t.split('=');
+                    tags[k] = v;
+                });
+                offset++;
+            }
+
+            // 2. Prefix
+            let prefix = '';
+            if (parts[offset] && parts[offset].startsWith(':')) {
+                prefix = parts[offset].slice(1);
+                offset++;
+            }
+
+            // 3. Command
+            const command = parts[offset];
+            offset++;
+
+            if (command !== 'PRIVMSG') return null;
+
+            // 4. Channel
+            const channel = parts[offset];
+            offset++;
+
+            // 5. Message body (everything after the first ' :')
+            // IRC protocol: the message often starts with a colon after the command/params
+            const rawMessageIdx = raw.indexOf(' :', raw.indexOf('PRIVMSG'));
+            const text = rawMessageIdx !== -1 ? raw.slice(rawMessageIdx + 2) : parts.slice(offset).join(' ');
+
+            const username = tags['display-name'] || prefix.split('!')[0] || 'Unknown';
+            const color = tags['color'] || '#9147ff';
 
             const emotes = {};
-            if (meta['emotes']) {
-                meta['emotes'].split('/').forEach(e => {
+            if (tags['emotes']) {
+                tags['emotes'].split('/').forEach(e => {
                     const [id, pos] = e.split(':');
                     pos.split(',').forEach(p => emotes[p] = id);
                 });
             }
 
             return {
-                id: meta['id'],
-                userId: meta['user-id'],
-                username: meta['display-name'] || raw.split('!')[0].split(':')[1] || 'Unknown',
-                color: meta['color'] || '#9147ff',
-                text: msgPart.trim(),
+                id: tags['id'] || Math.random().toString(36).substr(2, 9),
+                userId: tags['user-id'],
+                username,
+                color,
+                text: text.trim(),
                 emotes,
                 time: new Date()
             };

@@ -186,22 +186,20 @@
                         <p class="font-medium">Waiting for data feed...</p>
                     </div>
 
-                    <transition-group name="list">
-                        <div v-for="msg in filteredMessages" :key="msg.id"
-                            :class="['group flex items-start gap-4 p-2.5 rounded-lg bg-white/[0.01] hover:bg-white/[0.03] transition-colors', getSentimentClass(msg.text)]">
-                            <div v-if="store.config.timestampsEnabled" class="min-w-[65px] text-right pt-1">
-                                <span class="text-[0.7rem] text-gray-500 font-mono font-medium">{{
-                                    msg.time.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) }}</span>
-                            </div>
-                            <div class="flex-1 leading-relaxed" :style="{ fontSize: 'var(--chat-font-size)' }">
-                                <span class="font-bold cursor-pointer hover:underline mr-2"
-                                    :style="{ color: msg.color }" @click="setUserFilter(msg.username)">
-                                    {{ msg.username }}
-                                </span>
-                                <span class="text-gray-100 break-words" v-html="formatBody(msg)"></span>
-                            </div>
+                    <div v-for="msg in filteredMessages" :key="msg.id"
+                        :class="['group flex items-start gap-4 p-2.5 rounded-lg bg-white/[0.01] hover:bg-white/[0.03] transition-colors', getSentimentClass(msg.text)]">
+                        <div v-if="store.config.timestampsEnabled" class="min-w-[65px] text-right pt-[2px]">
+                            <span class="text-[0.7rem] text-gray-400 font-mono font-medium">{{
+                                msg.time.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) }}</span>
                         </div>
-                    </transition-group>
+                        <div class="flex-1 leading-relaxed" :style="{ fontSize: 'var(--chat-font-size)' }">
+                            <span class="font-bold cursor-pointer hover:underline mr-2" :style="{ color: msg.color }"
+                                @click="setUserFilter(msg.username)">
+                                {{ msg.username }}
+                            </span>
+                            <span class="text-gray-100 break-words" v-html="formatBody(msg)"></span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Jump Button -->
