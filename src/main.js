@@ -137,14 +137,20 @@ const app = createApp({
             if (!force && !store.autoScroll) return;
             nextTick(() => {
                 if (messageListRef.value) {
-                    messageListRef.value.scrollTop = messageListRef.value.scrollHeight;
+                    messageListRef.value.scrollTo({
+                        top: messageListRef.value.scrollHeight,
+                        behavior: force ? 'instant' : 'smooth'
+                    });
                 }
             });
         };
 
         const handleScroll = (e) => {
             const { scrollTop, scrollHeight, clientHeight } = e.target;
-            const isAtBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 10;
+            // Precise threshold: if user is within 50px of bottom, stick to bottom
+            const isAtBottom = scrollHeight - clientHeight - scrollTop < 50;
+
+            // Only update store if it's a genuine change in state
             if (store.autoScroll !== isAtBottom) {
                 store.autoScroll = isAtBottom;
             }

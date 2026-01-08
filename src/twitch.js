@@ -53,7 +53,7 @@ export const TwitchClient = {
             const parts = raw.split(' :');
             const tagPart = parts[0];
             const msgPart = parts.slice(1).join(' :');
-            
+
             const meta = {};
             tagPart.split(';').forEach(tag => {
                 const [key, val] = tag.split('=');
@@ -71,7 +71,7 @@ export const TwitchClient = {
             return {
                 id: meta['id'],
                 userId: meta['user-id'],
-                username: meta['display-name'] || raw.match(/:([^!]+)!/)?.[1] || 'Unknown',
+                username: meta['display-name'] || raw.split('!')[0].split(':')[1] || 'Unknown',
                 color: meta['color'] || '#9147ff',
                 text: msgPart.trim(),
                 emotes,
@@ -102,10 +102,10 @@ export const TwitchClient = {
 
     processMessageHtml(text, twitchEmotes, alertWords = []) {
         // Escape HTML
-        let html = text.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-        
+        let html = text.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+
         // Twitch Emotes (Reverse sort unique ranges to prevent overlap issues)
-        const ranges = Object.keys(twitchEmotes).sort((a,b) => parseInt(b.split('-')[0]) - parseInt(a.split('-')[0]));
+        const ranges = Object.keys(twitchEmotes).sort((a, b) => parseInt(b.split('-')[0]) - parseInt(a.split('-')[0]));
         ranges.forEach(range => {
             const [start, end] = range.split('-').map(Number);
             const id = twitchEmotes[range];
