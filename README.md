@@ -11,11 +11,11 @@ NexChat is a high-performance, real-time Twitch chat monitoring dashboard design
   - Native Twitch Emotes
   - BetterTTV (BTTV) Global & Channel Emotes
   - 7TV (v3) Global & Channel Emotes
-- **🧠 Signal Intelligence**:
+- **🧠 Chat Analytics**:
   - **Sentiment Analysis**: Real-time emotional tone detection (Positive/Negative/Neutral).
-  - **High-Frequency Leaderboard**: Tracks top chatters dynamically.
-  - **Entity Analysis**: Deep-dive into specific user histories with one click.
-- **🔔 Mission Control**:
+  - **Top Chatters Leaderboard**: Tracks high-frequency participants dynamically.
+  - **User Dashboard**: Deep-dive into specific user histories with one click.
+- **🔔 Channel Control**:
   - Custom Alert Triggers with visual highlighting.
   - Message Filtering & Search.
   - Glassmorphism UI with Dark Mode optimized for stream monitoring.
@@ -48,4 +48,4 @@ Simply open `index.html` in any modern web browser. No installation or build ste
 
 ## 🤝 Contributing
 
-NexChat is built for the community. Feel free to open issues or submit pull requests to enhance the signal intelligence capabilities!
+NexChat is built for the community. Feel free to open issues or submit pull requests to enhance the chat analytics capabilities!

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexChat | Twitch Chat Intelligence</title>
+    <title>NexChat | Twitch Chat Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -27,6 +27,7 @@
             --glass: rgba(24, 24, 27, 0.8);
             --glass-border: rgba(255, 255, 255, 0.05);
             --radius: 12px;
+            --chat-font-size: 0.95rem;
         }
 
         * {
@@ -135,6 +136,12 @@
             -webkit-text-fill-color: transparent;
         }
 
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
         .status-badge {
             display: flex;
             align-items: center;
@@ -159,6 +166,17 @@
             box-shadow: 0 0 10px var(--positive);
         }
 
+        .settings-toggle {
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+
+        .settings-toggle:hover {
+            color: var(--text);
+        }
+
         /* Controls Section */
         .controls-grid {
             display: flex;
@@ -180,7 +198,8 @@
             color: var(--text-muted);
         }
 
-        input {
+        input,
+        select {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 8px;
@@ -259,6 +278,8 @@
             flex-direction: column;
             overflow: hidden;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            position: relative;
+            /* Added for jump button */
         }
 
         .chat-header {
@@ -268,6 +289,38 @@
             justify-content: space-between;
             align-items: center;
             background: rgba(255, 255, 255, 0.02);
+            gap: 12px;
+        }
+
+        .chat-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .toggle-btn.active {
+            background: rgba(145, 71, 255, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .toggle-btn:hover {
+            border-color: var(--text-muted);
         }
 
         .message-list {
@@ -277,6 +330,34 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            scroll-behavior: smooth;
+            /* Added for smooth jump */
+        }
+
+        #jump-to-bottom {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        #jump-to-bottom:hover {
+            background: var(--primary-hover);
+            transform: translateX(-50%) translateY(-2px);
         }
 
         /* Message Styling */
@@ -325,7 +406,7 @@
         .msg-body {
             flex: 1;
             line-height: 1.5;
-            font-size: 0.95rem;
+            font-size: var(--chat-font-size);
         }
 
         .username {
@@ -441,25 +522,7 @@
             margin: 4px;
         }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-muted);
-        }
-
-        /* Responsive Modal */
+        /* Modal Base */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -471,17 +534,59 @@
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 2000;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         .modal {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 24px;
-            width: 400px;
+            padding: 32px;
+            width: 480px;
             max-width: 90%;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.6);
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+        }
+
+        .modal-close {
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--text-muted);
         }
 
         /* Toggles */
@@ -489,7 +594,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .toggle-group:last-of-type {
+            border-bottom: none;
         }
 
         .switch {
@@ -536,6 +646,24 @@
         input:checked+.slider:before {
             transform: translateX(20px);
         }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
     </style>
 </head>
 
@@ -548,16 +676,21 @@
                     <h1>NexChat</h1>
                 </div>
             </div>
-            <div class="status-badge">
-                <div id="status-dot" class="status-dot"></div>
-                <span id="status-text">DISCONNECTED</span>
+            <div class="header-actions">
+                <div class="status-badge">
+                    <div id="status-dot" class="status-dot"></div>
+                    <span id="status-text">DISCONNECTED</span>
+                </div>
+                <div class="settings-toggle" id="open-settings">
+                    <i class="fa-solid fa-gear"></i>
+                </div>
             </div>
         </header>
 
         <aside class="sidebar section-controls">
             <div class="sidebar-header">
-                <i class="fa-solid fa-sliders"></i>
-                <h2>Mission Control</h2>
+                <i class="fa-solid fa-play-circle"></i>
+                <h2>Channel Control</h2>
             </div>
             <div class="sidebar-content">
                 <div class="controls-grid">
@@ -566,41 +699,23 @@
                         <input type="text" id="channel-input" placeholder="twitch.tv/ninja" autocomplete="off">
                     </div>
                     <div class="input-group">
-                        <label>Alert Triggers (Split by ,)</label>
+                        <label>Alert Words (Split by ,)</label>
                         <input type="text" id="alert-words" placeholder="pog, omg, hype" autocomplete="off">
                     </div>
                     <button id="start-btn" class="btn btn-primary">
                         <i class="fa-solid fa-play"></i> START TRACKING
                     </button>
                     <button id="stop-btn" class="btn btn-danger" style="display: none;">
-                        <i class="fa-solid fa-stop"></i> TERMINATE
+                        <i class="fa-solid fa-stop"></i> STOP TRACKING
                     </button>
-
-                    <div style="margin-top: 24px;">
-                        <label>Display Synergy</label>
-                        <div class="toggle-group">
-                            <span>Sentiment Engine</span>
-                            <label class="switch">
-                                <input type="checkbox" id="sentiment-toggle" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="toggle-group">
-                            <span>Time Matrix</span>
-                            <label class="switch">
-                                <input type="checkbox" id="timestamp-toggle" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div>
 
                     <div style="margin: 24px 0; height: 1px; background: var(--border);"></div>
 
                     <button id="download-btn" class="btn btn-outline">
-                        <i class="fa-solid fa-download"></i> EXPORT CORE
+                        <i class="fa-solid fa-download"></i> EXPORT LOG
                     </button>
                     <button id="upload-btn" class="btn btn-outline">
-                        <i class="fa-solid fa-upload"></i> IMPORT BYTES
+                        <i class="fa-solid fa-upload"></i> IMPORT LOG
                     </button>
                     <input type="file" id="file-input" style="display: none;">
                 </div>
@@ -610,75 +725,148 @@
         <main class="main-content">
             <div class="stats-row">
                 <div class="stat-card">
-                    <div class="stat-label">Throughput / Min</div>
+                    <div class="stat-label">Messages / Min</div>
                     <div class="stat-value" id="mpm-counter">0</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Total Packets</div>
+                    <div class="stat-label">Total Messages</div>
                     <div class="stat-value" id="total-counter">0</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Uptime</div>
+                    <div class="stat-label">Session Time</div>
                     <div class="stat-value" id="uptime-counter">00:00</div>
                 </div>
             </div>
 
             <div class="chat-view">
                 <div class="chat-header">
-                    <div class="logo-text">
-                        <h2 style="font-size: 1rem; color: var(--text-muted);">LIVE STREAM DATA</h2>
+                    <div class="chat-actions">
+                        <h2 style="font-size: 1rem; color: var(--text-muted); margin-right: 12px;">LIVE CHAT</h2>
+                        <button id="autoscroll-toggle" class="toggle-btn active">
+                            <i class="fa-solid fa-angles-down"></i> AUTO-SCROLL
+                        </button>
                     </div>
-                    <input type="text" id="search-input" placeholder="Filter stream..."
+                    <input type="text" id="search-input" placeholder="Search keywords..."
                         style="padding: 6px 12px; font-size: 0.8rem; width: 200px;">
                 </div>
                 <div class="message-list" id="message-list">
                     <div
                         style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-muted);">
-                        <i class="fa-solid fa-satellite-dish"
-                            style="font-size: 2rem; margin-bottom: 16px; opacity: 0.3;"></i>
-                        <p>Awaiting satellite link...</p>
+                        <i class="fa-solid fa-message" style="font-size: 2rem; margin-bottom: 16px; opacity: 0.3;"></i>
+                        <p>Waiting for connection...</p>
                     </div>
                 </div>
+                <button id="jump-to-bottom">
+                    <i class="fa-solid fa-arrow-down"></i> New Messages
+                </button>
             </div>
         </main>
 
         <aside class="sidebar section-intel">
             <div class="sidebar-header">
-                <i class="fa-solid fa-brain"></i>
-                <h2>Signal Intelligence</h2>
+                <i class="fa-solid fa-chart-line"></i>
+                <h2>Chat Analytics</h2>
             </div>
             <div class="sidebar-content">
                 <div class="intel-section">
-                    <label>High-Frequency Chatters</label>
+                    <label>Active Chatters</label>
                     <div id="top-chatters" style="margin-top: 12px;">
                         <!-- Top chatters here -->
                     </div>
                 </div>
 
                 <div class="intel-section" style="margin-top: 32px;">
-                    <label>Active Identifiers</label>
+                    <label>Keywords Triggered</label>
                     <div id="alert-words-display" style="margin-top: 12px; display: flex; flex-wrap: wrap;">
                         <!-- Alert words here -->
                     </div>
                 </div>
 
                 <div id="user-detail-panel" class="intel-section" style="margin-top: 32px; display: none;">
-                    <label>Entity Analysis</label>
+                    <label>User Profile</label>
                     <div
                         style="background: rgba(145, 71, 255, 0.05); padding: 16px; border-radius: 8px; border: 1px solid var(--primary); margin-top: 12px;">
-                        <h3 id="target-user" style="color: var(--primary); font-family: 'Outfit';">USER_ID</h3>
-                        <p id="target-count" style="font-size: 0.8rem; margin-bottom: 8px;">0 SIGS DETECTED</p>
+                        <h3 id="target-user" style="color: var(--primary); font-family: 'Outfit';">USER</h3>
+                        <p id="target-count" style="font-size: 0.8rem; margin-bottom: 8px;">0 MESSAGES</p>
                         <div id="target-messages"
                             style="font-size: 0.75rem; color: var(--text-muted); max-height: 200px; overflow-y: auto;">
                         </div>
                         <button onclick="NexChat.clearUserFilter()" class="btn btn-primary"
                             style="width: 100%; margin-top: 12px; padding: 6px;">
-                            RESET SCAN
+                            CLEAR FILTER
                         </button>
                     </div>
                 </div>
             </div>
         </aside>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Application Settings</h2>
+                <div class="modal-close" id="close-settings"><i class="fa-solid fa-times"></i></div>
+            </div>
+
+            <div class="settings-content">
+                <div class="input-group" style="margin-bottom: 24px;">
+                    <label>Chat Font Size</label>
+                    <select id="setting-font-size">
+                        <option value="0.8rem">Small</option>
+                        <option value="0.95rem" selected>Medium (Default)</option>
+                        <option value="1.1rem">Large</option>
+                        <option value="1.25rem">Extra Large</option>
+                    </select>
+                </div>
+
+                <div class="input-group" style="margin-bottom: 24px;">
+                    <label>Scrollback Limit (Max Messages)</label>
+                    <input type="number" id="setting-max-msgs" value="500" min="50" max="2000">
+                </div>
+
+                <div class="toggle-group">
+                    <span>Sentiment Indicators</span>
+                    <label class="switch">
+                        <input type="checkbox" id="setting-sentiment" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-group">
+                    <span>Show Timestamps</span>
+                    <label class="switch">
+                        <input type="checkbox" id="setting-timestamps" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-group">
+                    <span>Alert Audio Ping</span>
+                    <label class="switch">
+                        <input type="checkbox" id="setting-audio">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-group">
+                    <span>Auto-Connect on Startup</span>
+                    <label class="switch">
+                        <input type="checkbox" id="setting-autoconnect">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div style="margin-top: 32px;">
+                    <button id="save-settings" class="btn btn-primary" style="width: 100%;">
+                        SAVE & APPLY
+                    </button>
+                    <p style="text-align: center; font-size: 0.7rem; color: var(--text-muted); margin-top: 12px;">
+                        Settings are stored locally in your browser session.
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -694,12 +882,24 @@
             let userFilter = null;
             let searchQuery = '';
             let autoScroll = true;
-            let sentimentEnabled = true;
-            let timestampsEnabled = true;
-            let maxMessages = 500;
             let channelId = null;
             let emoteMap = {};
             let uptimeInterval = null;
+
+            // App Settings (Persistent)
+            let config = {
+                channel: '',
+                alerts: '',
+                fontSize: '0.95rem',
+                maxMessages: 500,
+                sentimentEnabled: true,
+                timestampsEnabled: true,
+                audioEnabled: false,
+                autoConnect: false
+            };
+
+            // Audio Context for ping
+            let audioCtx = null;
 
             // Cache DOM
             const dom = {
@@ -723,13 +923,30 @@
                 targetUser: document.getElementById('target-user'),
                 targetCount: document.getElementById('target-count'),
                 targetMsgs: document.getElementById('target-messages'),
-                sentimentToggle: document.getElementById('sentiment-toggle'),
-                timeToggle: document.getElementById('timestamp-toggle')
+
+                // Chat Actions
+                autoscrollBtn: document.getElementById('autoscroll-toggle'),
+                jumpBtn: document.getElementById('jump-to-bottom'),
+
+                // Modals
+                settingsModal: document.getElementById('settings-modal'),
+                openSettingsBtn: document.getElementById('open-settings'),
+                closeSettingsBtn: document.getElementById('close-settings'),
+                saveSettingsBtn: document.getElementById('save-settings'),
+
+                // Setting Inputs
+                setFontSize: document.getElementById('setting-font-size'),
+                setMaxMsgs: document.getElementById('setting-max-msgs'),
+                setSentiment: document.getElementById('setting-sentiment'),
+                setTimestamps: document.getElementById('setting-timestamps'),
+                setAudio: document.getElementById('setting-audio'),
+                setAutoConnect: document.getElementById('setting-autoconnect')
             };
 
             const init = () => {
                 attachEvents();
                 loadStoredConfig();
+                if (config.autoConnect && config.channel) startTracking();
             };
 
             const attachEvents = () => {
@@ -743,40 +960,119 @@
                     renderMessages();
                 };
                 dom.alertInput.onchange = updateAlertWords;
-                dom.sentimentToggle.onclick = () => { sentimentEnabled = !sentimentEnabled; renderMessages(); };
-                dom.timeToggle.onclick = () => { timestampsEnabled = !timestampsEnabled; renderMessages(); };
+
+                // Modal Events
+                dom.openSettingsBtn.onclick = () => { dom.settingsModal.style.display = 'flex'; };
+                dom.closeSettingsBtn.onclick = () => { dom.settingsModal.style.display = 'none'; };
+                dom.saveSettingsBtn.onclick = saveSettings;
+                dom.settingsModal.onclick = (e) => { if (e.target === dom.settingsModal) dom.settingsModal.style.display = 'none'; };
+
+                dom.autoscrollBtn.onclick = () => {
+                    autoScroll = !autoScroll;
+                    dom.autoscrollBtn.classList.toggle('active', autoScroll);
+                    if (autoScroll) {
+                        dom.messageList.scrollTop = dom.messageList.scrollHeight;
+                        dom.jumpBtn.style.display = 'none';
+                    }
+                };
+
+                dom.jumpBtn.onclick = () => {
+                    dom.messageList.scrollTop = dom.messageList.scrollHeight;
+                    autoScroll = true;
+                    dom.autoscrollBtn.classList.add('active');
+                    dom.jumpBtn.style.display = 'none';
+                };
 
                 dom.messageList.onscroll = () => {
                     const { scrollTop, scrollHeight, clientHeight } = dom.messageList;
-                    autoScroll = (scrollHeight - scrollTop - clientHeight) < 50;
+                    const isAtBottom = (scrollHeight - scrollTop - clientHeight) < 100;
+
+                    // Update jump button visibility
+                    dom.jumpBtn.style.display = isAtBottom ? 'none' : 'flex';
+
+                    // Update autoscroll state if user manually scrolls away from bottom
+                    if (!isAtBottom && autoScroll) {
+                        // We don't force disable the toggle, but we stop the scrolling logic
+                        // If the user wants to keep it OFF, they click the button.
+                    }
                 };
             };
 
             const loadStoredConfig = () => {
-                const config = JSON.parse(localStorage.getItem('nexchat_config') || '{}');
-                dom.channelInput.value = config.channel || '';
-                dom.alertInput.value = config.alerts || '';
+                const stored = JSON.parse(localStorage.getItem('nexchat_config_v2') || '{}');
+                config = { ...config, ...stored };
+
+                dom.channelInput.value = config.channel;
+                dom.alertInput.value = config.alerts;
+
+                // Set UI state from config
+                dom.setFontSize.value = config.fontSize;
+                dom.setMaxMsgs.value = config.maxMessages;
+                dom.setSentiment.checked = config.sentimentEnabled;
+                dom.setTimestamps.checked = config.timestampsEnabled;
+                dom.setAudio.checked = config.audioEnabled;
+                dom.setAutoConnect.checked = config.autoConnect;
+
+                document.documentElement.style.setProperty('--chat-font-size', config.fontSize);
                 updateAlertWords();
             };
 
-            const saveConfig = () => {
-                localStorage.setItem('nexchat_config', JSON.stringify({
+            const saveSettings = () => {
+                config.fontSize = dom.setFontSize.value;
+                config.maxMessages = parseInt(dom.setMaxMsgs.value);
+                config.sentimentEnabled = dom.setSentiment.checked;
+                config.timestampsEnabled = dom.setTimestamps.checked;
+                config.audioEnabled = dom.setAudio.checked;
+                config.autoConnect = dom.setAutoConnect.checked;
+
+                document.documentElement.style.setProperty('--chat-font-size', config.fontSize);
+                localStorage.setItem('nexchat_config_v2', JSON.stringify({
+                    ...config,
                     channel: dom.channelInput.value,
                     alerts: dom.alertInput.value
                 }));
+
+                dom.settingsModal.style.display = 'none';
+                renderMessages();
             };
 
             const updateAlertWords = () => {
                 alertWords = dom.alertInput.value.split(',').map(w => w.trim()).filter(w => w);
                 dom.alertDisplay.innerHTML = alertWords.map(w => `<span class="alert-tag"><i class="fa-solid fa-bell"></i> ${w}</span>`).join('');
                 renderMessages();
-                saveConfig();
+
+                localStorage.setItem('nexchat_config_v2', JSON.stringify({
+                    ...config,
+                    channel: dom.channelInput.value,
+                    alerts: dom.alertInput.value
+                }));
+            };
+
+            const playAlertSound = () => {
+                if (!config.audioEnabled) return;
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.1);
+
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.2);
             };
 
             const setConnectionState = (isActive) => {
                 connected = isActive;
                 dom.statusDot.className = `status-dot ${isActive ? 'active' : ''}`;
-                dom.statusText.textContent = isActive ? 'CONNECTED' : 'DISCONNECTED';
+                dom.statusText.textContent = isActive ? 'LIVE' : 'DISCONNECTED';
                 dom.startBtn.style.display = isActive ? 'none' : 'flex';
                 dom.stopBtn.style.display = isActive ? 'flex' : 'none';
 
@@ -832,7 +1128,6 @@
                 };
 
                 ws.onclose = () => setConnectionState(false);
-                saveConfig();
             }
 
             const stopTracking = () => {
@@ -907,7 +1202,7 @@
                                 });
                             }
                         });
-                } catch (e) { console.error("Emote fail", e); }
+                } catch (e) { console.error("Emote fetch failed", e); }
             }
 
             const addMessage = (msg) => {
@@ -915,7 +1210,18 @@
                 messageCount++;
                 topChatters[msg.username] = (topChatters[msg.username] || 0) + 1;
 
-                if (messages.length > maxMessages) messages.shift();
+                if (messages.length > config.maxMessages) {
+                    messages.shift();
+                    // Keep DOM in sync: remove first message element if we are appending
+                    if (dom.messageList.children.length > config.maxMessages && !userFilter && !searchQuery) {
+                        dom.messageList.removeChild(dom.messageList.children[0]);
+                    }
+                }
+
+                // Alert Sound Check
+                if (alertWords.some(w => msg.text.toLowerCase().includes(w.toLowerCase()))) {
+                    playAlertSound();
+                }
 
                 if (isVisible(msg)) renderSingleMessage(msg);
                 updateStats();
@@ -966,8 +1272,8 @@
                 const div = document.createElement('div');
                 div.className = `message ${sentiment}`;
 
-                const time = timestampsEnabled ? `<span class="timestamp">${msg.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>` : '';
-                const glow = sentimentEnabled && sentiment !== 'neutral' ? `<div class="sentiment-glow"></div>` : '';
+                const time = config.timestampsEnabled ? `<span class="timestamp">${msg.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>` : '';
+                const glow = config.sentimentEnabled && sentiment !== 'neutral' ? `<div class="sentiment-glow"></div>` : '';
 
                 div.innerHTML = `
                     ${glow}
@@ -984,7 +1290,7 @@
 
             const renderMessages = () => {
                 dom.messageList.innerHTML = '';
-                messages.filter(isVisible).slice(-100).forEach(msg => renderSingleMessage(msg));
+                messages.filter(isVisible).slice(-200).forEach(msg => renderSingleMessage(msg));
             };
 
             const updateStats = () => {
@@ -1024,9 +1330,9 @@
             };
 
             const renderUserIntel = () => {
-                dom.targetUser.textContent = userFilter.toUpperCase();
+                dom.targetUser.textContent = userFilter;
                 const userMsgs = messages.filter(m => m.username === userFilter);
-                dom.targetCount.textContent = `${userMsgs.length} SIGNALS DETECTED`;
+                dom.targetCount.textContent = `${userMsgs.length} MESSAGES`;
                 dom.targetMsgs.innerHTML = userMsgs.slice(-10).reverse().map(m => `
                     <div style="padding: 8px 0; border-bottom: 1px solid var(--border);">
                         [${m.time.toLocaleTimeString()}] ${m.text}
@@ -1056,7 +1362,7 @@
                         messages.forEach(m => topChatters[m.username] = (topChatters[m.username] || 0) + 1);
                         renderMessages();
                         updateStats();
-                    } catch (err) { alert("Invalid data fragment"); }
+                    } catch (err) { alert("Invalid data file"); }
                 };
                 reader.readAsText(file);
             };
