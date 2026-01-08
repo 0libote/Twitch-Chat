@@ -1,656 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="bg-[#0e0e10] text-[#efeff1]">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexChat | Twitch Chat Dashboard</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>NexChat | Modern Twitch Dashboard</title>
+
+    <!-- Libraries -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         :root {
-            --primary: #9147ff;
-            --primary-hover: #772ce8;
-            --bg: #0e0e10;
-            --surface: #18181b;
-            --surface-hover: #26262c;
-            --text: #efeff1;
-            --text-muted: #adadb8;
-            --positive: #00f593;
-            --negative: #eb0400;
-            --warning: #ffb700;
-            --border: rgba(255, 255, 255, 0.1);
-            --glass: rgba(24, 24, 27, 0.8);
-            --glass-border: rgba(255, 255, 255, 0.05);
-            --radius: 12px;
             --chat-font-size: 0.95rem;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            scrollbar-width: thin;
-            scrollbar-color: var(--primary) transparent;
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            background-image:
-                radial-gradient(circle at 10% 20%, rgba(145, 71, 255, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(145, 71, 255, 0.05) 0%, transparent 40%);
-            color: var(--text);
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
-        .app-container {
-            width: 100%;
-            height: 100%;
-            display: grid;
-            grid-template-columns: 320px 1fr 320px;
-            grid-template-rows: auto 1fr;
-            gap: 16px;
-            padding: 16px;
-            backdrop-filter: blur(20px);
-        }
-
-        /* Sidebars Shared */
-        .sidebar {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-        }
-
-        .sidebar-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .sidebar-header h2 {
+        .font-outfit {
             font-family: 'Outfit', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text);
         }
 
-        .sidebar-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
+        /* Glassmorphism Utilities */
+        .glass {
+            background: rgba(24, 24, 27, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        /* Top Header */
-        header {
-            grid-column: 1 / -1;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            padding: 16px 24px;
-            border-radius: var(--radius);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--primary);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            box-shadow: 0 0 20px rgba(145, 71, 255, 0.3);
-        }
-
-        .logo-text h1 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.4rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #fff 0%, #adadb8 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .status-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--negative);
-            box-shadow: 0 0 10px var(--negative);
-        }
-
-        .status-dot.active {
-            background: var(--positive);
-            box-shadow: 0 0 10px var(--positive);
-        }
-
-        .settings-toggle {
-            cursor: pointer;
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            transition: color 0.2s;
-        }
-
-        .settings-toggle:hover {
-            color: var(--text);
-        }
-
-        /* Controls Section */
-        .controls-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-muted);
-        }
-
-        input,
-        select {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px;
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(145, 71, 255, 0.1);
-        }
-
-        .btn {
-            border: none;
-            border-radius: 8px;
-            padding: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            font-size: 0.9rem;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(145, 71, 255, 0.4);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text);
-        }
-
-        .btn-outline:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: var(--text-muted);
-        }
-
-        .btn-danger {
-            background: rgba(235, 4, 0, 0.1);
-            color: var(--negative);
-            border: 1px solid rgba(235, 4, 0, 0.2);
-        }
-
-        .btn-danger:hover {
-            background: rgba(235, 4, 0, 0.2);
-        }
-
-        /* Chat Section */
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .chat-view {
-            flex: 1;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            position: relative;
-            /* Added for jump button */
-        }
-
-        .chat-header {
-            padding: 16px 24px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.02);
-            gap: 12px;
-        }
-
-        .chat-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .toggle-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .toggle-btn.active {
-            background: rgba(145, 71, 255, 0.1);
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .toggle-btn:hover {
-            border-color: var(--text-muted);
-        }
-
-        .message-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            /* Remove smooth scroll globally to fix programmatic scroll lag */
-        }
-
-        #jump-to-bottom {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--primary);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            display: none;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            z-index: 10;
-            border: none;
-            transition: all 0.2s;
-        }
-
-        #jump-to-bottom:hover {
-            background: var(--primary-hover);
-            transform: translateX(-50%) translateY(-2px);
-        }
-
-        /* Message Styling */
-        .message {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 10px 14px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid transparent;
-            transition: all 0.2s;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .message:hover {
-            background: rgba(255, 255, 255, 0.04);
-            border-color: var(--glass-border);
-        }
-
-        .msg-meta {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            /* Align timestamp to the right of its box */
-            min-width: 65px;
-            padding-top: 4px;
-            /* Line up with username top */
-        }
-
-        .timestamp {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            font-weight: 500;
-            white-space: nowrap;
-        }
-
-        .msg-body {
-            flex: 1;
-            line-height: 1.5;
-            font-size: var(--chat-font-size);
-        }
-
-        .username {
-            font-weight: 700;
-            margin-right: 8px;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .username:hover {
-            opacity: 0.8;
-            text-decoration: underline;
-        }
-
-        .message-text {
-            color: var(--text);
-            word-break: break-word;
-        }
-
-        /* Emotes */
-        .emote {
-            vertical-align: middle;
-            margin: -2px 2px;
-            max-height: 28px;
-            object-fit: contain;
-        }
-
-        /* Sentiment Indicators */
-        .sentiment-glow {
-            width: 4px;
-            height: 24px;
-            border-radius: 2px;
-            margin-right: 8px;
-        }
-
-        .positive .sentiment-glow {
-            background: var(--positive);
-            box-shadow: 0 0 10px var(--positive);
-        }
-
-        .negative .sentiment-glow {
-            background: var(--negative);
-            box-shadow: 0 0 10px var(--negative);
-        }
-
-        /* Stats Blocks */
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-        }
-
-        .stat-card {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            padding: 16px;
-            border-radius: var(--radius);
-            text-align: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .stat-value {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--primary);
-        }
-
-        /* Lists */
-        .list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.03);
-            margin-bottom: 8px;
-            border: 1px solid transparent;
-        }
-
-        .list-item:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: var(--glass-border);
-        }
-
-        .badge {
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            background: var(--primary);
-        }
-
-        .alert-tag {
-            background: rgba(255, 183, 0, 0.1);
-            color: var(--warning);
-            border: 1px solid rgba(255, 183, 0, 0.2);
-            padding: 4px 10px;
-            border-radius: 100px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            margin: 4px;
-        }
-
-        /* Modal Base */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            animation: fadeIn 0.2s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        .modal {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 32px;
-            width: 480px;
-            max-width: 90%;
-            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.6);
-            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(30px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .modal-header h2 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.5rem;
-        }
-
-        .modal-close {
-            cursor: pointer;
-            font-size: 1.5rem;
-            color: var(--text-muted);
-        }
-
-        /* Toggles */
-        .toggle-group {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .toggle-group:last-of-type {
-            border-bottom: none;
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 44px;
-            height: 24px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--surface-hover);
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked+.slider {
-            background-color: var(--primary);
-        }
-
-        input:checked+.slider:before {
-            transform: translateX(20px);
-        }
-
-        /* Scrollbar */
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -665,715 +49,268 @@
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary);
+            background: #9147ff;
+        }
+
+        /* Animations */
+        .list-enter-active,
+        .list-leave-active {
+            transition: all 0.3s ease;
+        }
+
+        .list-enter-from {
+            opacity: 0;
+            transform: translateY(10px);
         }
     </style>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        twitch: '#9147ff',
+                        'twitch-hover': '#772ce8',
+                        surface: '#18181b',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
 
-<body>
-    <div class="app-container">
-        <header>
-            <div class="logo">
-                <div class="logo-icon"><i class="fa-brands fa-twitch"></i></div>
-                <div class="logo-text">
-                    <h1>NexChat</h1>
+<body class="h-screen overflow-hidden flex items-center justify-center p-4">
+    <div id="app" class="w-full h-full grid grid-cols-[320px_1fr_320px] grid-rows-[auto_1fr] gap-4">
+
+        <!-- Header -->
+        <header class="col-span-3 glass rounded-xl px-6 py-4 flex justify-between items-center shadow-2xl">
+            <div class="flex items-center gap-4">
+                <div
+                    class="w-10 h-10 bg-twitch rounded-lg flex items-center justify-center text-xl shadow-[0_0_20px_rgba(145,71,255,0.3)]">
+                    <i class="fa-brands fa-twitch"></i>
                 </div>
+                <h1
+                    class="font-outfit text-2xl font-extrabold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                    NexChat
+                </h1>
             </div>
-            <div class="header-actions">
-                <div class="status-badge">
-                    <div id="status-dot" class="status-dot"></div>
-                    <span id="status-text">DISCONNECTED</span>
+
+            <div class="flex items-center gap-6">
+                <div class="bg-white/5 px-4 py-2 rounded-full flex items-center gap-3 text-sm font-semibold">
+                    <div
+                        :class="['w-2 h-2 rounded-full shadow-lg', store.status === 'connected' ? 'bg-green-400 shadow-green-400/50' : 'bg-red-500 shadow-red-500/50']">
+                    </div>
+                    <span class="uppercase tracking-wider">{{ store.status === 'connected' ? 'Live' : 'Disconnected'
+                        }}</span>
                 </div>
-                <div class="settings-toggle" id="open-settings">
-                    <i class="fa-solid fa-gear"></i>
-                </div>
+                <button @click="store.showSettings = true"
+                    class="text-gray-400 hover:text-white transition-colors text-xl">
+                    <i class="fa-solid fa-cog"></i>
+                </button>
             </div>
         </header>
 
-        <aside class="sidebar section-controls">
-            <div class="sidebar-header">
-                <i class="fa-solid fa-play-circle"></i>
-                <h2>Channel Control</h2>
+        <!-- Sidebar: Channel Control -->
+        <aside class="glass rounded-xl flex flex-col overflow-hidden shadow-xl">
+            <div class="p-5 border-b border-white/5 flex items-center gap-3">
+                <i class="fa-solid fa-play-circle text-twitch"></i>
+                <h2 class="font-outfit font-semibold text-lg">Channel Control</h2>
             </div>
-            <div class="sidebar-content">
-                <div class="controls-grid">
-                    <div class="input-group">
-                        <label>Target Channel</label>
-                        <input type="text" id="channel-input" placeholder="twitch.tv/ninja" autocomplete="off">
-                    </div>
-                    <div class="input-group">
-                        <label>Alert Words (Split by ,)</label>
-                        <input type="text" id="alert-words" placeholder="pog, omg, hype" autocomplete="off">
-                    </div>
-                    <button id="start-btn" class="btn btn-primary">
+            <div class="flex-1 overflow-y-auto p-5 space-y-6">
+                <div class="space-y-2">
+                    <label class="text-[0.65rem] font-bold text-gray-500 uppercase tracking-widest leading-none">Target
+                        Channel</label>
+                    <input v-model="store.config.channel" type="text" placeholder="twitch.tv/ninja"
+                        class="w-full bg-[#18181b] border border-white/10 rounded-lg p-3 text-sm focus:border-twitch focus:ring-1 focus:ring-twitch outline-none transition-all">
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[0.65rem] font-bold text-gray-500 uppercase tracking-widest leading-none">Alert
+                        Words (comma separated)</label>
+                    <input v-model="store.config.alerts" @change="store.updateConfig(store.config)" type="text"
+                        placeholder="pog, hype, omg"
+                        class="w-full bg-[#18181b] border border-white/10 rounded-lg p-3 text-sm focus:border-twitch focus:ring-1 focus:ring-twitch outline-none transition-all">
+                </div>
+
+                <div class="flex flex-col gap-3">
+                    <button v-if="store.status !== 'connected'" @click="startTracking"
+                        class="bg-twitch hover:bg-twitch-hover text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-twitch/20">
                         <i class="fa-solid fa-play"></i> START TRACKING
                     </button>
-                    <button id="stop-btn" class="btn btn-danger" style="display: none;">
+                    <button v-else @click="stopTracking"
+                        class="bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-all active:scale-95">
                         <i class="fa-solid fa-stop"></i> STOP TRACKING
                     </button>
+                </div>
 
-                    <div style="margin: 24px 0; height: 1px; background: var(--border);"></div>
-
-                    <button id="download-btn" class="btn btn-outline">
+                <div class="border-t border-white/5 pt-6 flex flex-col gap-3">
+                    <button @click="exportLog"
+                        class="bg-white/5 hover:bg-white/10 border border-white/5 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 text-gray-300">
                         <i class="fa-solid fa-download"></i> EXPORT LOG
                     </button>
-                    <button id="upload-btn" class="btn btn-outline">
-                        <i class="fa-solid fa-upload"></i> IMPORT LOG
-                    </button>
-                    <input type="file" id="file-input" style="display: none;">
                 </div>
             </div>
         </aside>
 
-        <main class="main-content">
-            <div class="stats-row">
-                <div class="stat-card">
-                    <div class="stat-label">Messages / Min</div>
-                    <div class="stat-value" id="mpm-counter">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Total Messages</div>
-                    <div class="stat-value" id="total-counter">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Session Time</div>
-                    <div class="stat-value" id="uptime-counter">00:00</div>
+        <!-- Main Feed -->
+        <main class="flex flex-col gap-4">
+            <!-- Stats -->
+            <div class="grid grid-cols-3 gap-4">
+                <div v-for="stat in [{l:'Messages / Min', v:messagesPerMinute}, {l:'Total Messages', v:store.totalMessages}, {l:'Session Time', v:uptime}]"
+                    class="glass rounded-xl p-4 text-center">
+                    <div class="text-[0.65rem] font-bold text-gray-500 uppercase tracking-widest mb-1">{{ stat.l }}
+                    </div>
+                    <div class="font-outfit text-2xl font-extrabold text-twitch">{{ stat.v }}</div>
                 </div>
             </div>
 
-            <div class="chat-view">
-                <div class="chat-header">
-                    <div class="chat-actions">
-                        <h2 style="font-size: 1rem; color: var(--text-muted); margin-right: 12px;">LIVE CHAT</h2>
-                        <button id="autoscroll-toggle" class="toggle-btn active">
-                            <i class="fa-solid fa-angles-down"></i> AUTO-SCROLL
+            <!-- Chat Container -->
+            <div class="flex-1 glass rounded-xl flex flex-col overflow-hidden relative shadow-2xl">
+                <div class="px-6 py-4 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                    <div class="flex items-center gap-4">
+                        <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Live Chat</h2>
+                        <button @click="store.autoScroll = !store.autoScroll"
+                            :class="['text-[0.65rem] font-bold px-3 py-1 rounded transition-all', store.autoScroll ? 'bg-twitch/20 text-twitch border border-twitch/30' : 'bg-white/5 text-gray-400 border border-white/10']">
+                            <i class="fa-solid fa-angles-down mr-1"></i> AUTO-SCROLL
                         </button>
                     </div>
-                    <input type="text" id="search-input" placeholder="Search keywords..."
-                        style="padding: 6px 12px; font-size: 0.8rem; width: 200px;">
+                    <input v-model="store.searchQuery" type="text" placeholder="Search keywords..."
+                        class="bg-[#18181b] border border-white/10 rounded-lg px-4 py-1.5 text-xs outline-none focus:border-twitch/50 w-48 transition-all">
                 </div>
-                <div class="message-list" id="message-list">
-                    <div
-                        style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-muted);">
-                        <i class="fa-solid fa-message" style="font-size: 2rem; margin-bottom: 16px; opacity: 0.3;"></i>
-                        <p>Waiting for connection...</p>
+
+                <div ref="messageListRef" @scroll="handleScroll"
+                    class="flex-1 overflow-y-auto p-6 space-y-3 custom-scrollbar">
+                    <div v-if="filteredMessages.length === 0"
+                        class="h-full flex flex-col items-center justify-center text-gray-600 opacity-50 space-y-4">
+                        <i class="fa-solid fa-message text-5xl"></i>
+                        <p class="font-medium">Waiting for data feed...</p>
                     </div>
+
+                    <transition-group name="list">
+                        <div v-for="msg in filteredMessages" :key="msg.id"
+                            :class="['group flex items-start gap-4 p-2.5 rounded-lg bg-white/[0.01] hover:bg-white/[0.03] transition-colors', getSentimentClass(msg.text)]">
+                            <div v-if="store.config.timestampsEnabled" class="min-w-[65px] text-right pt-1">
+                                <span class="text-[0.7rem] text-gray-500 font-mono font-medium">{{
+                                    msg.time.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) }}</span>
+                            </div>
+                            <div class="flex-1 leading-relaxed" :style="{ fontSize: 'var(--chat-font-size)' }">
+                                <span class="font-bold cursor-pointer hover:underline mr-2"
+                                    :style="{ color: msg.color }" @click="setUserFilter(msg.username)">
+                                    {{ msg.username }}
+                                </span>
+                                <span class="text-gray-100 break-words" v-html="formatBody(msg)"></span>
+                            </div>
+                        </div>
+                    </transition-group>
                 </div>
-                <button id="jump-to-bottom">
+
+                <!-- Jump Button -->
+                <button v-show="!store.autoScroll" @click="scrollToBottom(); store.autoScroll = true"
+                    class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-twitch text-white px-5 py-2 rounded-full text-xs font-bold shadow-2xl flex items-center gap-2 active:scale-95 transition-all">
                     <i class="fa-solid fa-arrow-down"></i> New Messages
                 </button>
             </div>
         </main>
 
-        <aside class="sidebar section-intel">
-            <div class="sidebar-header">
-                <i class="fa-solid fa-chart-line"></i>
-                <h2>Chat Analytics</h2>
+        <!-- Sidebar: Analytics -->
+        <aside class="glass rounded-xl flex flex-col overflow-hidden shadow-xl">
+            <div class="p-5 border-b border-white/5 flex items-center gap-3">
+                <i class="fa-solid fa-chart-line text-twitch"></i>
+                <h2 class="font-outfit font-semibold text-lg">Chat Analytics</h2>
             </div>
-            <div class="sidebar-content">
-                <div class="intel-section">
-                    <label>Active Chatters</label>
-                    <div id="top-chatters" style="margin-top: 12px;">
-                        <!-- Top chatters here -->
-                    </div>
-                </div>
 
-                <div class="intel-section" style="margin-top: 32px;">
-                    <label>Keywords Triggered</label>
-                    <div id="alert-words-display" style="margin-top: 12px; display: flex; flex-wrap: wrap;">
-                        <!-- Alert words here -->
-                    </div>
-                </div>
-
-                <div id="user-detail-panel" class="intel-section" style="margin-top: 32px; display: none;">
-                    <label>User Profile</label>
-                    <div
-                        style="background: rgba(145, 71, 255, 0.05); padding: 16px; border-radius: 8px; border: 1px solid var(--primary); margin-top: 12px;">
-                        <h3 id="target-user" style="color: var(--primary); font-family: 'Outfit';">USER</h3>
-                        <p id="target-count" style="font-size: 0.8rem; margin-bottom: 8px;">0 MESSAGES</p>
-                        <div id="target-messages"
-                            style="font-size: 0.75rem; color: var(--text-muted); max-height: 200px; overflow-y: auto;">
+            <div class="flex-1 overflow-y-auto p-5 space-y-8">
+                <div>
+                    <label class="text-[0.65rem] font-bold text-gray-500 uppercase tracking-widest">Active
+                        Chatters</label>
+                    <div class="mt-4 space-y-2">
+                        <div v-for="[user, count] in sortedChatters" @click="setUserFilter(user)"
+                            class="flex justify-between items-center p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/5 cursor-pointer transition-all">
+                            <span class="text-sm font-medium">{{ user }}</span>
+                            <span class="bg-twitch px-2 py-0.5 rounded-md text-[0.6rem] font-bold">{{ count }}</span>
                         </div>
-                        <button onclick="NexChat.clearUserFilter()" class="btn btn-primary"
-                            style="width: 100%; margin-top: 12px; padding: 6px;">
-                            CLEAR FILTER
-                        </button>
                     </div>
+                </div>
+
+                <div>
+                    <label class="text-[0.65rem] font-bold text-gray-500 uppercase tracking-widest">Keywords
+                        Triggered</label>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <span v-for="word in store.activeAlerts"
+                            class="bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 px-3 py-1 rounded-full text-[0.7rem] font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-bell text-[0.6rem]"></i> {{ word }}
+                        </span>
+                    </div>
+                </div>
+
+                <div v-if="store.userFilter"
+                    class="bg-twitch/5 border border-twitch/20 p-5 rounded-xl space-y-4 animate-pulse">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3
+                                class="font-outfit text-twitch font-bold text-lg leading-none mb-1 uppercase tracking-tight">
+                                {{ store.userFilter }}</h3>
+                            <p class="text-[0.6rem] text-gray-500 font-bold uppercase tracking-widest">User Dashboard
+                            </p>
+                        </div>
+                        <button @click="store.userFilter = null" class="text-gray-500 hover:text-white"><i
+                                class="fa-solid fa-times"></i></button>
+                    </div>
+                    <button @click="store.userFilter = null"
+                        class="w-full bg-twitch text-white py-2 rounded-lg text-xs font-bold shadow-lg shadow-twitch/20">CLEAR
+                        FILTER</button>
                 </div>
             </div>
         </aside>
-    </div>
 
-    <!-- Settings Modal -->
-    <div class="modal-overlay" id="settings-modal">
-        <div class="modal">
-            <div class="modal-header">
-                <h2>Application Settings</h2>
-                <div class="modal-close" id="close-settings"><i class="fa-solid fa-times"></i></div>
-            </div>
-
-            <div class="settings-content">
-                <div class="input-group" style="margin-bottom: 24px;">
-                    <label>Chat Font Size</label>
-                    <select id="setting-font-size">
-                        <option value="0.8rem">Small</option>
-                        <option value="0.95rem" selected>Medium (Default)</option>
-                        <option value="1.1rem">Large</option>
-                        <option value="1.25rem">Extra Large</option>
-                    </select>
+        <!-- Settings Modal -->
+        <div v-if="store.showSettings"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-6">
+            <div class="glass w-full max-w-md rounded-2xl p-8 shadow-3xl animate-in fade-in zoom-in duration-200">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="font-outfit text-2xl font-bold">Preferences</h2>
+                    <button @click="store.showSettings = false" class="text-gray-500 hover:text-white text-2xl"><i
+                            class="fa-solid fa-times"></i></button>
                 </div>
 
-                <div class="input-group" style="margin-bottom: 24px;">
-                    <label>Scrollback Limit (Max Messages)</label>
-                    <input type="number" id="setting-max-msgs" value="500" min="50" max="2000">
-                </div>
+                <div class="space-y-6">
+                    <div class="space-y-2">
+                        <label class="text-[0.65rem] font-bold text-gray-500 uppercase tracking-widest">Chat
+                            Appearance</label>
+                        <select v-model="store.config.fontSize"
+                            class="w-full bg-surface border border-white/10 rounded-lg p-3 outline-none">
+                            <option value="0.8rem">Small</option>
+                            <option value="0.95rem">Medium (Default)</option>
+                            <option value="1.1rem">Large</option>
+                            <option value="1.25rem">Extra Large</option>
+                        </select>
+                    </div>
 
-                <div class="toggle-group">
-                    <span>Sentiment Indicators</span>
-                    <label class="switch">
-                        <input type="checkbox" id="setting-sentiment" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
+                    <div class="space-y-4 pt-4">
+                        <div v-for="(val, key) in {sentimentEnabled:'Sentiment Indicators', timestampsEnabled:'Show Timestamps', audioEnabled:'Audio Alerts', autoConnect:'Auto-Connect'}"
+                            class="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
+                            <span class="text-sm font-medium text-gray-300">{{ val }}</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" v-model="store.config[key]" class="sr-only peer">
+                                <div
+                                    class="w-11 h-6 bg-surface peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-twitch">
+                                </div>
+                            </label>
+                        </div>
+                    </div>
 
-                <div class="toggle-group">
-                    <span>Show Timestamps</span>
-                    <label class="switch">
-                        <input type="checkbox" id="setting-timestamps" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div class="toggle-group">
-                    <span>Alert Audio Ping</span>
-                    <label class="switch">
-                        <input type="checkbox" id="setting-audio">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div class="toggle-group">
-                    <span>Auto-Connect on Startup</span>
-                    <label class="switch">
-                        <input type="checkbox" id="setting-autoconnect">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div style="margin-top: 32px;">
-                    <button id="save-settings" class="btn btn-primary" style="width: 100%;">
-                        SAVE & APPLY
+                    <button @click="store.updateConfig(store.config); store.showSettings = false"
+                        class="w-full bg-twitch py-3 rounded-lg font-bold mt-4 shadow-xl active:scale-95 transition-all">
+                        SAVE AND APPLY
                     </button>
-                    <p style="text-align: center; font-size: 0.7rem; color: var(--text-muted); margin-top: 12px;">
-                        Settings are stored locally in your browser session.
-                    </p>
                 </div>
             </div>
         </div>
+
     </div>
 
-    <script>
-        const NexChat = (() => {
-            // State
-            let ws = null;
-            let messages = [];
-            let connected = false;
-            let startTime = null;
-            let messageCount = 0;
-            let alertWords = [];
-            let topChatters = {};
-            let userFilter = null;
-            let searchQuery = '';
-            let autoScroll = true;
-            let channelId = null;
-            let emoteMap = {};
-            let uptimeInterval = null;
-
-            // App Settings (Persistent)
-            let config = {
-                channel: '',
-                alerts: '',
-                fontSize: '0.95rem',
-                maxMessages: 500,
-                sentimentEnabled: true,
-                timestampsEnabled: true,
-                audioEnabled: false,
-                autoConnect: false
-            };
-
-            // Audio Context for ping
-            let audioCtx = null;
-
-            // Cache DOM
-            const dom = {
-                channelInput: document.getElementById('channel-input'),
-                alertInput: document.getElementById('alert-words'),
-                startBtn: document.getElementById('start-btn'),
-                stopBtn: document.getElementById('stop-btn'),
-                downloadBtn: document.getElementById('download-btn'),
-                uploadBtn: document.getElementById('upload-btn'),
-                fileInput: document.getElementById('file-input'),
-                messageList: document.getElementById('message-list'),
-                searchInput: document.getElementById('search-input'),
-                alertDisplay: document.getElementById('alert-words-display'),
-                topChatters: document.getElementById('top-chatters'),
-                mpm: document.getElementById('mpm-counter'),
-                total: document.getElementById('total-counter'),
-                uptime: document.getElementById('uptime-counter'),
-                statusDot: document.getElementById('status-dot'),
-                statusText: document.getElementById('status-text'),
-                userPanel: document.getElementById('user-detail-panel'),
-                targetUser: document.getElementById('target-user'),
-                targetCount: document.getElementById('target-count'),
-                targetMsgs: document.getElementById('target-messages'),
-
-                // Chat Actions
-                autoscrollBtn: document.getElementById('autoscroll-toggle'),
-                jumpBtn: document.getElementById('jump-to-bottom'),
-
-                // Modals
-                settingsModal: document.getElementById('settings-modal'),
-                openSettingsBtn: document.getElementById('open-settings'),
-                closeSettingsBtn: document.getElementById('close-settings'),
-                saveSettingsBtn: document.getElementById('save-settings'),
-
-                // Setting Inputs
-                setFontSize: document.getElementById('setting-font-size'),
-                setMaxMsgs: document.getElementById('setting-max-msgs'),
-                setSentiment: document.getElementById('setting-sentiment'),
-                setTimestamps: document.getElementById('setting-timestamps'),
-                setAudio: document.getElementById('setting-audio'),
-                setAutoConnect: document.getElementById('setting-autoconnect')
-            };
-
-            const init = () => {
-                attachEvents();
-                loadStoredConfig();
-                if (config.autoConnect && config.channel) startTracking();
-            };
-
-            const attachEvents = () => {
-                dom.startBtn.onclick = startTracking;
-                dom.stopBtn.onclick = stopTracking;
-                dom.downloadBtn.onclick = downloadChat;
-                dom.uploadBtn.onclick = () => dom.fileInput.click();
-                dom.fileInput.onchange = handleFileUpload;
-                dom.searchInput.oninput = (e) => {
-                    searchQuery = e.target.value.toLowerCase();
-                    renderMessages();
-                };
-                dom.alertInput.onchange = updateAlertWords;
-
-                // Modal Events
-                dom.openSettingsBtn.onclick = () => { dom.settingsModal.style.display = 'flex'; };
-                dom.closeSettingsBtn.onclick = () => { dom.settingsModal.style.display = 'none'; };
-                dom.saveSettingsBtn.onclick = saveSettings;
-                dom.settingsModal.onclick = (e) => { if (e.target === dom.settingsModal) dom.settingsModal.style.display = 'none'; };
-
-                dom.autoscrollBtn.onclick = () => {
-                    autoScroll = !autoScroll;
-                    dom.autoscrollBtn.classList.toggle('active', autoScroll);
-                    if (autoScroll) {
-                        dom.messageList.scrollTop = dom.messageList.scrollHeight;
-                        dom.jumpBtn.style.display = 'none';
-                    }
-                };
-
-                dom.jumpBtn.onclick = () => {
-                    autoScroll = true;
-                    dom.autoscrollBtn.classList.add('active');
-                    dom.messageList.scrollTo({ top: dom.messageList.scrollHeight, behavior: 'smooth' });
-                    dom.jumpBtn.style.display = 'none';
-                };
-
-                dom.messageList.onscroll = () => {
-                    const { scrollTop, scrollHeight, clientHeight } = dom.messageList;
-                    const isAtBottom = (scrollHeight - scrollTop - clientHeight) < 50;
-
-                    dom.jumpBtn.style.display = isAtBottom ? 'none' : 'flex';
-
-                    // If user scrolls up, disable autoscroll automatically
-                    if (!isAtBottom && autoScroll) {
-                        autoScroll = false;
-                        dom.autoscrollBtn.classList.remove('active');
-                    }
-                };
-            };
-
-            const loadStoredConfig = () => {
-                const stored = JSON.parse(localStorage.getItem('nexchat_config_v2') || '{}');
-                config = { ...config, ...stored };
-
-                dom.channelInput.value = config.channel;
-                dom.alertInput.value = config.alerts;
-
-                // Set UI state from config
-                dom.setFontSize.value = config.fontSize;
-                dom.setMaxMsgs.value = config.maxMessages;
-                dom.setSentiment.checked = config.sentimentEnabled;
-                dom.setTimestamps.checked = config.timestampsEnabled;
-                dom.setAudio.checked = config.audioEnabled;
-                dom.setAutoConnect.checked = config.autoConnect;
-
-                document.documentElement.style.setProperty('--chat-font-size', config.fontSize);
-                updateAlertWords();
-            };
-
-            const saveSettings = () => {
-                config.fontSize = dom.setFontSize.value;
-                config.maxMessages = parseInt(dom.setMaxMsgs.value);
-                config.sentimentEnabled = dom.setSentiment.checked;
-                config.timestampsEnabled = dom.setTimestamps.checked;
-                config.audioEnabled = dom.setAudio.checked;
-                config.autoConnect = dom.setAutoConnect.checked;
-
-                document.documentElement.style.setProperty('--chat-font-size', config.fontSize);
-                localStorage.setItem('nexchat_config_v2', JSON.stringify({
-                    ...config,
-                    channel: dom.channelInput.value,
-                    alerts: dom.alertInput.value
-                }));
-
-                dom.settingsModal.style.display = 'none';
-                renderMessages();
-            };
-
-            const updateAlertWords = () => {
-                alertWords = dom.alertInput.value.split(',').map(w => w.trim()).filter(w => w);
-                dom.alertDisplay.innerHTML = alertWords.map(w => `<span class="alert-tag"><i class="fa-solid fa-bell"></i> ${w}</span>`).join('');
-                renderMessages();
-
-                localStorage.setItem('nexchat_config_v2', JSON.stringify({
-                    ...config,
-                    channel: dom.channelInput.value,
-                    alerts: dom.alertInput.value
-                }));
-            };
-
-            const playAlertSound = () => {
-                if (!config.audioEnabled) return;
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.1);
-
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
-
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.2);
-            };
-
-            const setConnectionState = (isActive) => {
-                connected = isActive;
-                dom.statusDot.className = `status-dot ${isActive ? 'active' : ''}`;
-                dom.statusText.textContent = isActive ? 'LIVE' : 'DISCONNECTED';
-                dom.startBtn.style.display = isActive ? 'none' : 'flex';
-                dom.stopBtn.style.display = isActive ? 'flex' : 'none';
-
-                if (isActive) {
-                    startTime = new Date();
-                    uptimeInterval = setInterval(updateStats, 1000);
-                } else {
-                    clearInterval(uptimeInterval);
-                    startTime = null;
-                }
-            };
-
-            async function startTracking() {
-                let channel = dom.channelInput.value.trim().toLowerCase();
-                if (!channel) return;
-
-                if (channel.includes('twitch.tv/')) {
-                    channel = channel.split('twitch.tv/')[1].split('/')[0];
-                }
-
-                if (ws) ws.close();
-
-                ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
-
-                ws.onopen = () => {
-                    setConnectionState(true);
-                    const nick = `justinfan${Math.floor(Math.random() * 89999) + 10000}`;
-                    ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
-                    ws.send(`NICK ${nick}`);
-                    ws.send(`JOIN #${channel}`);
-                    dom.messageList.innerHTML = '';
-                    messages = [];
-                    messageCount = 0;
-                    topChatters = {};
-                };
-
-                ws.onmessage = (event) => {
-                    const raw = event.data;
-                    if (raw.startsWith('PING')) return ws.send('PONG :tmi.twitch.tv');
-
-                    if (raw.includes('ROOMSTATE')) {
-                        const mid = raw.match(/room-id=(\d+)/);
-                        if (mid) {
-                            channelId = mid[1];
-                            fetchEmotes(channelId);
-                        }
-                    }
-
-                    if (raw.includes('PRIVMSG')) {
-                        const parsed = parseIrc(raw);
-                        if (parsed) addMessage(parsed);
-                    }
-                };
-
-                ws.onclose = () => setConnectionState(false);
-            }
-
-            const stopTracking = () => {
-                if (ws) ws.close();
-                setConnectionState(false);
-            };
-
-            const parseIrc = (raw) => {
-                try {
-                    const tagPart = raw.split(' :')[0];
-                    const msgPart = raw.split('PRIVMSG')[1].split(' :')[1];
-                    const meta = {};
-
-                    tagPart.split(';').forEach(tag => {
-                        const [key, val] = tag.split('=');
-                        meta[key] = val;
-                    });
-
-                    const emotes = {};
-                    if (meta['emotes']) {
-                        meta['emotes'].split('/').forEach(e => {
-                            const [id, pos] = e.split(':');
-                            pos.split(',').forEach(p => emotes[p] = id);
-                        });
-                    }
-
-                    return {
-                        id: meta['id'],
-                        userId: meta['user-id'],
-                        username: meta['display-name'] || raw.match(/:([^!]+)!/)[1],
-                        color: meta['color'] || '#9147ff',
-                        text: msgPart.trim(),
-                        emotes,
-                        time: new Date()
-                    };
-                } catch (e) { return null; }
-            };
-
-            async function fetchEmotes(cid) {
-                emoteMap = {};
-                try {
-                    // BTTV Global
-                    fetch('https://api.betterttv.net/3/cached/emotes/global')
-                        .then(r => r.json())
-                        .then(data => data.forEach(e => emoteMap[e.code] = { id: e.id, src: `https://cdn.betterttv.net/emote/${e.id}/1x` }));
-
-                    // BTTV Channel
-                    fetch(`https://api.betterttv.net/3/cached/users/twitch/${cid}`)
-                        .then(r => r.json())
-                        .then(data => {
-                            [...(data.channelEmotes || []), ...(data.sharedEmotes || [])].forEach(e => {
-                                emoteMap[e.code] = { id: e.id, src: `https://cdn.betterttv.net/emote/${e.id}/1x` };
-                            });
-                        });
-
-                    // 7TV Global (v3)
-                    fetch('https://7tv.io/v3/emotes/global')
-                        .then(r => r.json())
-                        .then(data => {
-                            data.emotes.forEach(e => {
-                                emoteMap[e.name] = { id: e.id, src: e.data.host.url.replace('/1x', '/1x.webp') };
-                            });
-                        });
-
-                    // 7TV Channel (v3)
-                    fetch(`https://7tv.io/v3/users/twitch/${cid}`)
-                        .then(r => r.json())
-                        .then(data => {
-                            if (data.emote_set && data.emote_set.emotes) {
-                                data.emote_set.emotes.forEach(e => {
-                                    emoteMap[e.name] = { id: e.id, src: e.data.host.url + '/1x.webp' };
-                                });
-                            }
-                        });
-                } catch (e) { console.error("Emote fetch failed", e); }
-            }
-
-            const addMessage = (msg) => {
-                messages.push(msg);
-                messageCount++;
-                topChatters[msg.username] = (topChatters[msg.username] || 0) + 1;
-
-                if (messages.length > config.maxMessages) {
-                    messages.shift();
-                    // Keep DOM in sync: remove first message element if we are appending
-                    if (dom.messageList.children.length > config.maxMessages && !userFilter && !searchQuery) {
-                        dom.messageList.removeChild(dom.messageList.children[0]);
-                    }
-                }
-
-                // Alert Sound Check
-                if (alertWords.some(w => msg.text.toLowerCase().includes(w.toLowerCase()))) {
-                    playAlertSound();
-                }
-
-                if (isVisible(msg)) renderSingleMessage(msg);
-                updateStats();
-            };
-
-            const isVisible = (msg) => {
-                if (userFilter && msg.username !== userFilter) return false;
-                if (searchQuery && !msg.text.toLowerCase().includes(searchQuery)) return false;
-                return true;
-            };
-
-            const processText = (text, twitchEmotes) => {
-                let html = text.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
-
-                // Twitch Emotes
-                const sorted = Object.keys(twitchEmotes).sort((a, b) => parseInt(b.split('-')[0]) - parseInt(a.split('-')[0]));
-                sorted.forEach(range => {
-                    const [start, end] = range.split('-').map(Number);
-                    const id = twitchEmotes[range];
-                    const emoteHtml = `<img class="emote" src="https://static-cdn.jtvnw.net/emoticons/v2/${id}/default/dark/1.0" alt="emote">`;
-                    html = html.substring(0, start) + emoteHtml + html.substring(end + 1);
-                });
-
-                // BTTV / 7TV
-                return html.split(' ').map(word => {
-                    if (emoteMap[word]) {
-                        return `<img class="emote" src="${emoteMap[word].src}" alt="${word}" title="${word}">`;
-                    }
-                    // Alert highlighting
-                    if (alertWords.some(w => word.toLowerCase().includes(w.toLowerCase()))) {
-                        return `<span style="background: var(--warning); color: black; border-radius: 4px; padding: 0 4px; font-weight: 700;">${word}</span>`;
-                    }
-                    return word;
-                }).join(' ');
-            };
-
-            const detectSentiment = (text) => {
-                const pos = ['pog', 'pogchamp', 'love', 'hype', 'lul', 'kek', 'ez', 'nice', 'huge', 'king', 'goat'];
-                const neg = ['bad', 'trash', 'l', 'toxic', 'dogshit', 'garbage', 'f', 'rip', 'throw', 'bad', 'cringe'];
-                const low = text.toLowerCase();
-                if (pos.some(w => low.includes(w))) return 'positive';
-                if (neg.some(w => low.includes(w))) return 'negative';
-                return 'neutral';
-            };
-
-            const renderSingleMessage = (msg, container = dom.messageList) => {
-                const sentiment = detectSentiment(msg.text);
-                const div = document.createElement('div');
-                div.className = `message ${sentiment}`;
-
-                const time = config.timestampsEnabled ? `<span class="timestamp">${msg.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>` : '';
-                const glow = config.sentimentEnabled && sentiment !== 'neutral' ? `<div class="sentiment-glow"></div>` : '';
-
-                div.innerHTML = `
-                    ${glow}
-                    <div class="msg-meta">${time}</div>
-                    <div class="msg-body">
-                        <span class="username" style="color: ${msg.color}" onclick="NexChat.setUserFilter('${msg.username}')">${msg.username}</span>
-                        <span class="message-text">${processText(msg.text, msg.emotes)}</span>
-                    </div>
-                `;
-
-                container.appendChild(div);
-                if (autoScroll && container === dom.messageList) container.scrollTop = container.scrollHeight;
-            };
-
-            const renderMessages = () => {
-                dom.messageList.innerHTML = '';
-                messages.filter(isVisible).slice(-200).forEach(msg => renderSingleMessage(msg));
-            };
-
-            const updateStats = () => {
-                const elapsed = startTime ? (new Date() - startTime) : 0;
-                const minutes = (elapsed / 60000) || 1;
-                dom.mpm.textContent = Math.round(messageCount / minutes);
-                dom.total.textContent = messageCount;
-
-                const h = Math.floor(elapsed / 3600000).toString().padStart(2, '0');
-                const m = Math.floor((elapsed % 3600000) / 60000).toString().padStart(2, '0');
-                const s = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
-                dom.uptime.textContent = `${h}:${m}:${s}`;
-
-                // Update Leaderboard
-                const sorted = Object.entries(topChatters).sort((a, b) => b[1] - a[1]).slice(0, 5);
-                dom.topChatters.innerHTML = sorted.map(([node, count]) => `
-                    <div class="list-item" onclick="NexChat.setUserFilter('${node}')" style="cursor: pointer;">
-                        <span>${node}</span>
-                        <span class="badge">${count}</span>
-                    </div>
-                `).join('');
-
-                if (userFilter) renderUserIntel();
-            };
-
-            const setUserFilter = (user) => {
-                userFilter = user;
-                dom.userPanel.style.display = 'block';
-                renderUserIntel();
-                renderMessages();
-            };
-
-            const clearUserFilter = () => {
-                userFilter = null;
-                dom.userPanel.style.display = 'none';
-                renderMessages();
-            };
-
-            const renderUserIntel = () => {
-                dom.targetUser.textContent = userFilter;
-                const userMsgs = messages.filter(m => m.username === userFilter);
-                dom.targetCount.textContent = `${userMsgs.length} MESSAGES`;
-                dom.targetMsgs.innerHTML = userMsgs.slice(-10).reverse().map(m => `
-                    <div style="padding: 8px 0; border-bottom: 1px solid var(--border);">
-                        [${m.time.toLocaleTimeString()}] ${m.text}
-                    </div>
-                `).join('');
-            };
-
-            const downloadChat = () => {
-                const blob = new Blob([JSON.stringify(messages, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `nexchat_${dom.channelInput.value}_${Date.now()}.json`;
-                a.click();
-            };
-
-            const handleFileUpload = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    try {
-                        const data = JSON.parse(ev.target.result);
-                        messages = data.map(m => ({ ...m, time: new Date(m.time) }));
-                        messageCount = messages.length;
-                        topChatters = {};
-                        messages.forEach(m => topChatters[m.username] = (topChatters[m.username] || 0) + 1);
-                        renderMessages();
-                        updateStats();
-                    } catch (err) { alert("Invalid data file"); }
-                };
-                reader.readAsText(file);
-            };
-
-            return { init, setUserFilter, clearUserFilter };
-        })();
-
-        window.onload = NexChat.init;
-    </script>
+    <!-- Application Script -->
+    <script type="module" src="src/main.js"></script>
 </body>
 
 </html>
