@@ -133,7 +133,8 @@ const app = createApp({
             store.startTime = null;
         };
 
-        const scrollToBottom = () => {
+        const scrollToBottom = (force = false) => {
+            if (!force && !store.autoScroll) return;
             nextTick(() => {
                 if (messageListRef.value) {
                     messageListRef.value.scrollTop = messageListRef.value.scrollHeight;
@@ -143,9 +144,25 @@ const app = createApp({
 
         const handleScroll = (e) => {
             const { scrollTop, scrollHeight, clientHeight } = e.target;
-            const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
-            store.autoScroll = isAtBottom;
+            const isAtBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 10;
+            if (store.autoScroll !== isAtBottom) {
+                store.autoScroll = isAtBottom;
+            }
         };
+
+        // Mutation Observer for guaranteed scroll sync
+        onMounted(() => {
+            const observer = new MutationObserver(() => {
+                if (store.autoScroll) scrollToBottom(true);
+            });
+            if (messageListRef.value) {
+                observer.observe(messageListRef.value, { childList: true, subtree: true });
+            }
+
+            store.activeAlerts = store.config.alerts.split(',').map(s => s.trim()).filter(s => s);
+            document.documentElement.style.setProperty('--chat-font-size', store.config.fontSize);
+            if (store.config.autoConnect) startTracking();
+        });
 
         const exportLog = () => {
             const blob = new Blob([JSON.stringify(store.messages, null, 2)], { type: 'application/json' });
@@ -171,11 +188,6 @@ const app = createApp({
             return s === 'positive' ? 'border-l-4 border-green-400' : s === 'negative' ? 'border-l-4 border-red-500' : '';
         };
 
-        onMounted(() => {
-            store.activeAlerts = store.config.alerts.split(',').map(s => s.trim()).filter(s => s);
-            document.documentElement.style.setProperty('--chat-font-size', store.config.fontSize);
-            if (store.config.autoConnect) startTracking();
-        });
 
         return {
             store,
